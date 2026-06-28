@@ -37,8 +37,8 @@ mcp = FastMCP(
 
 # When OIDC is on, enforce global_admin on every tool call (M2M/admin gate).
 if _auth is not None:
-    from src.admin_gate import AdminGate
-    mcp.add_middleware(AdminGate())
+    from src.admin_gate import EnterpriseGate
+    mcp.add_middleware(EnterpriseGate())
 
 # Initialize OpenProject client as global variable
 _client = None

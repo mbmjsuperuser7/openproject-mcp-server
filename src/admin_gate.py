@@ -1,15 +1,22 @@
-"""Global admin gate middleware.
+"""Defense-in-depth: enforce enterprise on every tool/resource operation.
 
-Every tool call on this server must be made by a Keycloak-authenticated caller
-holding the `global_admin` realm role. This is an M2M/admin connector, so the
-gate is applied uniformly rather than per-tool.
+The token verifier already rejects non-enterprise at connect; this is a second
+layer so no operation runs without the role even if a token slips through.
 """
 
 from fastmcp.server.middleware.middleware import Middleware
-from src.oidc_auth import require_admin
+from src.oidc_auth import require_enterprise
 
 
-class AdminGate(Middleware):
+class EnterpriseGate(Middleware):
     async def on_call_tool(self, context, call_next):
-        require_admin()  # raises PermissionError if role missing
+        require_enterprise()
+        return await call_next(context)
+
+    async def on_list_tools(self, context, call_next):
+        require_enterprise()
+        return await call_next(context)
+
+    async def on_read_resource(self, context, call_next):
+        require_enterprise()
         return await call_next(context)
