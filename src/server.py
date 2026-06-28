@@ -21,10 +21,24 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Initialize FastMCP server
+# Initialize FastMCP server — protected by Keycloak OIDC when configured.
+# OIDC_CONFIG_URL present => OAuth/global_admin gate is active (production).
+# Absent => unauthenticated (local dev / tests only).
+_auth = None
+if os.getenv("OIDC_CONFIG_URL"):
+    from src.oidc_auth import build_auth
+    _auth = build_auth()
+    logger.info("🔐 OIDC auth enabled (Keycloak)")
+
 mcp = FastMCP(
-    name="openproject-mcp"
+    name="openproject-mcp",
+    auth=_auth,
 )
+
+# When OIDC is on, enforce global_admin on every tool call (M2M/admin gate).
+if _auth is not None:
+    from src.admin_gate import AdminGate
+    mcp.add_middleware(AdminGate())
 
 # Initialize OpenProject client as global variable
 _client = None
