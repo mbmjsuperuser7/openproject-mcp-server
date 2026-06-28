@@ -1,5 +1,5 @@
 mcp
-fastmcp
+fastmcp>=2.13.2
 aiohttp
 python-dotenv
 certifi
