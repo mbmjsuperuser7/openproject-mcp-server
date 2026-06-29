@@ -87,3 +87,12 @@ def require_enterprise() -> None:
         raise PermissionError(
             f"Access restricted to '{REQUIRED_ROLE}' (enterprise) accounts."
         )
+
+
+def caller_email() -> str | None:
+    from fastmcp.server.dependencies import get_access_token
+    tok = get_access_token()
+    if tok is None:
+        return None
+    claims = getattr(tok, "claims", {}) or {}
+    return claims.get("email")
