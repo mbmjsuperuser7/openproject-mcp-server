@@ -76,6 +76,9 @@ def build_auth() -> OIDCProxy:
         # No FastMCP consent page — this is a first-party connector; Keycloak
         # (themed) is the sole auth UI. KC authenticates, grant authorizes.
         require_authorization_consent=False,
+        # Go straight to Google (same as the prvis apps via kc_idp_hint),
+        # instead of KC's raw username/password page.
+        extra_authorize_params={"kc_idp_hint": os.getenv("MCP_IDP_HINT", "google")},
     )
 
 
