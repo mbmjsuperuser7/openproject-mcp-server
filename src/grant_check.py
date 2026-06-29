@@ -57,15 +57,15 @@ def _fetch_m2m_token() -> str:
     return tok
 
 
-def _check_sync(domain: str, feature: str) -> bool:
-    key = (domain, feature)
+def _check_sync(domain: str, feature: str, email: str = "") -> bool:
+    key = (domain, feature, email)
     hit = _ent_cache.get(key)
     now = time.time()
     if hit and hit[1] > now:
         return hit[0]
     try:
         tok = _fetch_m2m_token()
-        qs = urllib.parse.urlencode({"tenant_id": domain, "feature": feature})
+        qs = urllib.parse.urlencode({"tenant_id": domain, "feature": feature, "email": email})
         req = urllib.request.Request(
             f"{GRANT_URL}/api/check?{qs}",
             headers={"User-Agent": UA, "Authorization": f"Bearer {tok}"},
@@ -85,4 +85,4 @@ async def is_entitled(email: str, feature: str | None = None) -> bool:
         return False
     domain = email.split("@", 1)[1].lower().strip()
     feat = feature or FEATURE
-    return await asyncio.to_thread(_check_sync, domain, feat)
+    return await asyncio.to_thread(_check_sync, domain, feat, email.lower().strip())
