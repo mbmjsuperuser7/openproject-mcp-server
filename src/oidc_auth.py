@@ -73,6 +73,9 @@ def build_auth() -> OIDCProxy:
         base_url=os.environ["MCP_BASE_URL"],
         token_verifier=verifier,
         token_endpoint_auth_method="client_secret_basic",
+        # No FastMCP consent page — this is a first-party connector; Keycloak
+        # (themed) is the sole auth UI. KC authenticates, grant authorizes.
+        require_authorization_consent=False,
     )
 
 
